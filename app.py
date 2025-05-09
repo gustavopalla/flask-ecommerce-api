@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from flask_login import UserMixin
+from flask_login import UserMixin, login_user, LoginManager
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce.db'
 
+login_manager = LoginManager()
 db = SQLAlchemy(app)
 CORS(app)
 
@@ -101,10 +102,10 @@ def login():
     
     user = User.query.filter_by(username=data.get("username")).first()
     
-    if user:
-        if data.get("password") == user.password:
-            return jsonify({"message": "Logged in successfully"})
-        return jsonify({"message": "Unauthorized. Invalid credentials"}), 401
+    if user and data.get("password") == user.password:
+        login_user(user)
+        return jsonify({"message": "Logged in successfully"})
+    return jsonify({"message": "Unauthorized. Invalid credentials"}), 401
 
 #Definir uma rota raiz (página inicial) e função que será executada ao requisitar
 @app.route('/')
