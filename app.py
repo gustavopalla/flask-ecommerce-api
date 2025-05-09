@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from flask_login import UserMixin
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce.db'
@@ -9,13 +10,20 @@ db = SQLAlchemy(app)
 CORS(app)
 
 #Modelagem 
-#Produto (id, name, price, description)
+# User(id,username, password)
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), nullable=False, unique=True)
+    password = db.Column(db.String(80), nullable=True)
 
+#Produto (id, name, price, description)
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
     price = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text, nullable=True)
+    
+#Inicio rota de produtos
 
 @app.route('/api/products/add', methods=["POST"])
 def add_product():
@@ -83,6 +91,20 @@ def get_products():
         }
         product_list.append(product_data)
     return jsonify(product_list)
+#Fim rota de produtos
+
+#Inicio rota de usuarios
+
+@app.route('/login', methods=["POST"])
+def login():
+    data = request.json
+    
+    user = User.query.filter_by(username=data.get("username")).first()
+    
+    if user:
+        if data.get("password") == user.password:
+            return jsonify({"message": "Logged in successfully"})
+        return jsonify({"message": "Unauthorized. Invalid credentials"}), 401
 
 #Definir uma rota raiz (página inicial) e função que será executada ao requisitar
 @app.route('/')
