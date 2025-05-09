@@ -66,6 +66,7 @@ def update_product(product_id):
     if 'description' in data:
         product.description = data['description']
     
+    db.session.commit()
     return jsonify({"message": "Product updated successfully"})
 
 
