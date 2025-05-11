@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from flask_login import UserMixin, login_user, LoginManager, login_required
+from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "my_key_123"
@@ -100,6 +100,11 @@ def get_products():
 #Fim rota de produtos
 
 #Inicio rota de usuarios
+#Autenticacao 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 @app.route('/login', methods=["POST"])
 def login():
     data = request.json
@@ -110,6 +115,12 @@ def login():
         login_user(user)
         return jsonify({"message": "Logged in successfully"})
     return jsonify({"message": "Unauthorized. Invalid credentials"}), 401
+
+@app.route('/logout', methods=["POST"])
+@login_required
+def logout():
+    logout_user()
+    return jsonify({"message": "Logout successfully"})
 
 #Definir uma rota raiz (página inicial) e função que será executada ao requisitar
 @app.route('/')
