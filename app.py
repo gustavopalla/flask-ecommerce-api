@@ -124,8 +124,8 @@ def logout():
 
 #Definir uma rota raiz (página inicial) e função que será executada ao requisitar
 @app.route('/')
-def hello_world():
-    return 'Hello world'
+def principal_route():
+    return 'Rota Principal'
 
 if __name__ == "__main__":
     app.run(debug=True)
